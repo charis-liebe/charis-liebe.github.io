@@ -2,7 +2,7 @@
 title: Vulnlab Baby Machine
 date: 2025-10-31 00:00:00 +0000
 categories: [WRITUPS, ACTIVE DIRECTORY]
-tags: [activedirectory]     # TAG names should always be lowercase
+tags: [activedirectory, sam, ntds]     # TAG names should always be lowercase
 ---
 
 # BABY MACHINES
