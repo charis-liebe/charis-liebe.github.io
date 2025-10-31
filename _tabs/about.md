@@ -17,7 +17,7 @@ These experiences continue to shape my vision: a world where technology empowers
 
 ---
 
-## My Mission
+## 🤷‍♂️My Mission
 
 This blog exists as a space to **share my research, experiments, and reflections** — all aimed at contributing to the advancement of **cybersecurity knowledge**.  
 I write about topics ranging from **network defense** and **cloud security** to **hands-on experiments** from CTFs and training labs.  
@@ -26,4 +26,3 @@ I write about topics ranging from **network defense** and **cloud security** to 
 
 If you’re passionate about cybersecurity, cloud, or digital transformation, you’re in the right place.  
 Let’s grow together — one insight at a time.
-
