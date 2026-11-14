@@ -1,5 +1,8 @@
 ---
 title: "AI Security #1: The Attack Surface of an AI, or Why Your Chatbot Has More Doors Than a Country House"
+image:
+  path: /assets/img/sample/Brume sur le laboratoire d’IA Leswi-1.png
+  alt: "Manga-style hacker surrounded by the four AI attack surfaces"
 date: 2026-11-13 12:00:00 +0000
 categories: [AI Security, Fundamentals]
 tags: [ai-security, llm, prompt-injection, rag, agents, threat-modeling]
