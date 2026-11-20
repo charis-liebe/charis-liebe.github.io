@@ -1,4 +1,204 @@
-<!-- Style cyber personnalisé : polices + feuille de style (le thème n'est pas modifié) -->
+<!-- Thème "CYBER x IA" : polices, feuille de style, réseau neuronal animé, sous-titre qui s'écrit, barre de lecture, rappel favori.
+     Le thème Chirpy n'est pas modifié. Pour tout désactiver : supprimer ce fichier. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="{{ '/assets/css/custom.css' | relative_url }}">
+
+<script>
+(function () {
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---- Phrases qui s'écrivent sous ton nom (modifie la liste à ta guise) ---- */
+  var PHRASES = ['A man behind the firewall', 'Offensive security', 'Cloud & Azure', 'AI security'];
+
+  /* ======================= 1. Réseau neuronal animé ======================= */
+  function neural() {
+    if (reduce) { return; }
+    var c = document.createElement('canvas');
+    c.id = 'neural-bg';
+    c.setAttribute('aria-hidden', 'true');
+    document.body.insertBefore(c, document.body.firstChild);
+    var ctx = c.getContext('2d');
+    if (!ctx) { return; }
+
+    var w = 0, h = 0, nodes = [], raf = 0;
+    var dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    var mouse = { x: -9999, y: -9999 };
+    var col1 = '0,229,255', col2 = '157,107,255', alpha = 1;
+
+    function readColors() {
+      var s = getComputedStyle(document.documentElement);
+      col1 = (s.getPropertyValue('--net-1') || col1).trim();
+      col2 = (s.getPropertyValue('--net-2') || col2).trim();
+      alpha = parseFloat(s.getPropertyValue('--net-alpha')) || 1;
+    }
+
+    function resize() {
+      w = window.innerWidth;
+      h = window.innerHeight;
+      c.width = w * dpr;
+      c.height = h * dpr;
+      c.style.width = w + 'px';
+      c.style.height = h + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      var n = Math.max(28, Math.min(85, Math.round(w * h / 18000)));
+      if (w < 700) { n = Math.min(n, 34); }
+      nodes = [];
+      for (var i = 0; i < n; i++) {
+        nodes.push({
+          x: Math.random() * w, y: Math.random() * h,
+          vx: (Math.random() - 0.5) * 0.35, vy: (Math.random() - 0.5) * 0.35,
+          r: Math.random() * 1.4 + 0.6, v: Math.random() < 0.28
+        });
+      }
+    }
+
+    function frame() {
+      ctx.clearRect(0, 0, w, h);
+      var i, j, a, b, dx, dy, d, k;
+      for (i = 0; i < nodes.length; i++) {
+        a = nodes[i];
+        a.x += a.vx; a.y += a.vy;
+        if (a.x < 0 || a.x > w) { a.vx *= -1; }
+        if (a.y < 0 || a.y > h) { a.vy *= -1; }
+      }
+      ctx.lineWidth = 1;
+      for (i = 0; i < nodes.length; i++) {
+        a = nodes[i];
+        for (j = i + 1; j < nodes.length; j++) {
+          b = nodes[j];
+          dx = a.x - b.x; dy = a.y - b.y;
+          d = Math.sqrt(dx * dx + dy * dy);
+          if (d < 150) {
+            k = (1 - d / 150) * 0.32 * alpha;
+            ctx.strokeStyle = 'rgba(' + (a.v ? col2 : col1) + ',' + k + ')';
+            ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+          }
+        }
+        dx = a.x - mouse.x; dy = a.y - mouse.y;
+        d = Math.sqrt(dx * dx + dy * dy);
+        if (d < 190) {
+          k = (1 - d / 190) * 0.7 * alpha;
+          ctx.strokeStyle = 'rgba(' + col1 + ',' + k + ')';
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(mouse.x, mouse.y); ctx.stroke();
+        }
+      }
+      for (i = 0; i < nodes.length; i++) {
+        a = nodes[i];
+        ctx.fillStyle = 'rgba(' + (a.v ? col2 : col1) + ',' + (0.75 * alpha) + ')';
+        ctx.beginPath(); ctx.arc(a.x, a.y, a.r, 0, 6.2832); ctx.fill();
+      }
+      raf = requestAnimationFrame(frame);
+    }
+
+    function start() { if (!raf) { raf = requestAnimationFrame(frame); } }
+    function stop() { if (raf) { cancelAnimationFrame(raf); raf = 0; } }
+
+    readColors();
+    resize();
+    start();
+
+    var t;
+    window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(resize, 200); });
+    window.addEventListener('mousemove', function (e) { mouse.x = e.clientX; mouse.y = e.clientY; }, { passive: true });
+    window.addEventListener('mouseout', function () { mouse.x = -9999; mouse.y = -9999; });
+    document.addEventListener('visibilitychange', function () { if (document.hidden) { stop(); } else { start(); } });
+    new MutationObserver(readColors).observe(document.documentElement, { attributes: true, attributeFilter: ['data-bs-theme', 'data-mode'] });
+  }
+
+  /* ======================= 2. Sous-titre qui s'écrit ======================= */
+  function typing() {
+    var el = document.querySelector('#sidebar .site-subtitle');
+    if (!el || reduce || PHRASES.length < 2) { return; }
+    el.setAttribute('aria-label', el.textContent.trim());
+    var p = 0, i = PHRASES[0].length, erasing = false;
+    el.textContent = PHRASES[0];
+    function tick() {
+      var s = PHRASES[p], delay = 70;
+      if (!erasing) {
+        i++;
+        el.textContent = s.slice(0, i);
+        if (i >= s.length) { erasing = true; delay = 2200; }
+      } else {
+        i--;
+        el.textContent = s.slice(0, i);
+        delay = 35;
+        if (i <= 0) { erasing = false; p = (p + 1) % PHRASES.length; delay = 400; }
+      }
+      setTimeout(tick, delay);
+    }
+    setTimeout(function () { erasing = true; tick(); }, 3500);
+  }
+
+  /* ======================= 3. Barre de progression de lecture ======================= */
+  function progress() {
+    var bar = document.createElement('div');
+    bar.id = 'read-progress';
+    document.body.appendChild(bar);
+    var ticking = false;
+    function update() {
+      var doc = document.documentElement;
+      var max = doc.scrollHeight - doc.clientHeight;
+      bar.style.width = (max > 0 ? Math.min(100, (doc.scrollTop / max) * 100) : 0) + '%';
+      ticking = false;
+    }
+    window.addEventListener('scroll', function () {
+      if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    }, { passive: true });
+    update();
+  }
+
+  /* ======================= 4. Rappel "enregistrer le blog" ======================= */
+  var deferred = null;
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; });
+
+  function bookmark() {
+    try {
+      var last = parseInt(localStorage.getItem('bm-dismissed') || '0', 10);
+      if (last && Date.now() - last < 14 * 24 * 3600 * 1000) { return; }
+    } catch (e) {}
+    setTimeout(function () {
+      var ua = navigator.userAgent || '';
+      var isIOS = /iPhone|iPad|iPod/i.test(ua);
+      var isAndroid = /Android/i.test(ua);
+      var isMac = /Mac/i.test(navigator.platform || '') && !isIOS;
+      var tip = isIOS ? 'Share \u2192 Add to Home Screen'
+        : isAndroid ? 'Menu \u2192 Add to Home screen'
+        : (isMac ? '\u2318' : 'Ctrl') + ' + D';
+
+      var box = document.createElement('div');
+      box.id = 'bm-pill';
+      box.setAttribute('role', 'note');
+
+      var txt = document.createElement('span');
+      txt.className = 'bm-text';
+      txt.textContent = '$ bookmark --add   ' + tip;
+      box.appendChild(txt);
+
+      if (deferred) {
+        var inst = document.createElement('button');
+        inst.type = 'button';
+        inst.className = 'bm-install';
+        inst.textContent = 'install';
+        inst.addEventListener('click', function () { deferred.prompt(); deferred = null; inst.remove(); });
+        box.appendChild(inst);
+      }
+
+      var close = document.createElement('button');
+      close.type = 'button';
+      close.className = 'bm-close';
+      close.setAttribute('aria-label', 'Close');
+      close.textContent = '\u00D7';
+      close.addEventListener('click', function () {
+        try { localStorage.setItem('bm-dismissed', String(Date.now())); } catch (e) {}
+        box.remove();
+      });
+      box.appendChild(close);
+      document.body.appendChild(box);
+    }, 8000);
+  }
+
+  function boot() { neural(); typing(); progress(); bookmark(); }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', boot); } else { boot(); }
+})();
+</script>
