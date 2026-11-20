@@ -1016,7 +1016,6 @@ Fill in this table while you do the lab. It is what turns an "it did not work" i
 | 2 | Poisoned logs | | | |
 | 3 | Booby-trapped document | | | |
 
-> 📸 **[IMAGE TO ADD: your filled-in results table, or a chart of the success rate per test]**
 
 ---
 
