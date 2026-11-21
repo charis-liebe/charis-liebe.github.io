@@ -1,0 +1,144 @@
+<!-- Mise en page "blog 2026" : barre de navigation flottante, hero d'accueil, grille d'articles.
+     S'ajoute PAR-DESSUS le thème Cyber x IA (custom.css n'est pas modifié).
+     Pour tout désactiver : retirer la ligne  include layout-2026.html  de metadata-hook.html -->
+<link rel="stylesheet" href="{{ '/assets/css/layout.css' | relative_url }}">
+
+<script>
+(function () {
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Phrases qui défilent dans le hero (modifie la liste à ta guise) */
+  var HERO_PHRASES = ['Offensive security', 'Cloud & Azure', 'AI security', 'Active Directory'];
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) { e.className = cls; }
+    if (text) { e.textContent = text; }
+    return e;
+  }
+
+  function hero() {
+    var list = document.getElementById('post-list');
+    if (!list || !list.parentNode) { return; }
+    var path = location.pathname.replace(/index\.html$/, '');
+    document.documentElement.classList.add('is-home');
+    if (path !== '/' && path !== '') { return; }          /* hero seulement sur la 1re page */
+    document.documentElement.classList.add('home-first');
+
+    var nameEl = document.querySelector('#sidebar .site-title');
+    var name = nameEl ? nameEl.textContent.trim() : 'Welcome';
+    var firstCard = list.querySelector('a.post-preview');
+    var latestTitle = list.querySelector('.card-title');
+    var aboutLink = document.querySelector('#sidebar a[href$="/about/"]');
+    var tags = [].slice.call(document.querySelectorAll('#panel-wrapper .post-tag'))
+      .slice(0, 6).map(function (t) { return t.textContent.trim(); });
+
+    var sec = el('section', 'hero');
+    sec.id = 'hero';
+
+    /* --- colonne texte --- */
+    var left = el('div', 'hero-text');
+    var badge = el('div', 'hero-badge');
+    badge.appendChild(el('span', 'hero-dot'));
+    badge.appendChild(document.createTextNode('online \u00B7 cybersecurity \u00B7 cloud \u00B7 AI'));
+    var top = el('div', 'hero-top');
+    var avImg = document.querySelector('#sidebar #avatar img');
+    if (avImg && avImg.getAttribute('src')) {
+      var av = el('div', 'hero-avatar');
+      var im = document.createElement('img');
+      im.src = avImg.getAttribute('src');
+      im.alt = '';
+      im.width = 84; im.height = 84;
+      im.onerror = function () { av.remove(); };
+      av.appendChild(im);
+      top.appendChild(av);
+    }
+    top.appendChild(badge);
+    left.appendChild(top);
+
+    var h = el('h1', 'hero-name', name);
+    h.className = 'hero-name notranslate';
+    h.setAttribute('translate', 'no');
+    left.appendChild(h);
+
+    var typed = el('p', 'hero-typed');
+    var tspan = el('span', 'hero-typed-text notranslate', HERO_PHRASES[0]);
+    tspan.setAttribute('translate', 'no');
+    typed.appendChild(document.createTextNode('> '));
+    typed.appendChild(tspan);
+    typed.appendChild(el('span', 'hero-caret', '\u2588'));
+    left.appendChild(typed);
+
+    left.appendChild(el('p', 'hero-desc',
+      'Research notes, hands-on labs and write-ups on offensive security, cloud and AI systems.'));
+
+    var cta = el('div', 'hero-cta');
+    var a1 = el('a', 'hero-btn primary', 'Read the latest \u2192');
+    a1.href = firstCard ? firstCard.getAttribute('href') : '#post-list';
+    var a2 = el('a', 'hero-btn ghost', 'About me');
+    a2.href = aboutLink ? aboutLink.getAttribute('href') : '/about/';
+    cta.appendChild(a1);
+    cta.appendChild(a2);
+    left.appendChild(cta);
+    sec.appendChild(left);
+
+    /* --- colonne terminal (données réelles du site) --- */
+    var term = el('div', 'hero-term notranslate');
+    term.setAttribute('aria-hidden', 'true');
+    term.setAttribute('translate', 'no');
+    var bar = el('div', 'hero-term-bar');
+    bar.appendChild(el('i')); bar.appendChild(el('i')); bar.appendChild(el('i'));
+    bar.appendChild(el('span', '', '~/blog'));
+    term.appendChild(bar);
+    var body = el('div', 'hero-term-body');
+    function cmd(c) { var d = el('div', 'tl-cmd'); d.appendChild(el('b', '', '$ ')); d.appendChild(document.createTextNode(c)); body.appendChild(d); }
+    function out(t) { body.appendChild(el('div', 'tl-out', t)); }
+    cmd('whoami');
+    out(name);
+    if (tags.length) { cmd('ls tags/'); out(tags.join('   ')); }
+    if (latestTitle) {
+      cmd('tail -n1 latest.log');
+      var t = latestTitle.textContent.trim();
+      out(t.length > 70 ? t.slice(0, 67) + '...' : t);
+    }
+    var last = el('div', 'tl-cmd');
+    last.appendChild(el('b', '', '$ '));
+    last.appendChild(el('span', 'hero-caret', '\u2588'));
+    body.appendChild(last);
+    term.appendChild(body);
+    sec.appendChild(term);
+
+    list.parentNode.insertBefore(sec, list);
+    list.parentNode.insertBefore(el('div', 'section-label', '// latest posts'), list);
+
+    /* --- texte qui s'écrit --- */
+    if (!reduce && HERO_PHRASES.length > 1) {
+      var p = 0, i = HERO_PHRASES[0].length, erasing = false;
+      (function tick() {
+        var s = HERO_PHRASES[p], delay = 80;
+        if (!erasing) {
+          i++; tspan.textContent = s.slice(0, i);
+          if (i >= s.length) { erasing = true; delay = 2000; }
+        } else {
+          i--; tspan.textContent = s.slice(0, i); delay = 40;
+          if (i <= 0) { erasing = false; p = (p + 1) % HERO_PHRASES.length; delay = 350; }
+        }
+        setTimeout(tick, delay);
+      })();
+    }
+  }
+
+  function scrolled() {
+    var on = false, root = document.documentElement;
+    function upd() {
+      var now = (window.pageYOffset || root.scrollTop) > 8;
+      if (now !== on) { on = now; root.classList.toggle('scrolled', on); }
+    }
+    window.addEventListener('scroll', upd, { passive: true });
+    upd();
+  }
+
+  function boot() { hero(); scrolled(); }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', boot); } else { boot(); }
+})();
+</script>
